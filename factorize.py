@@ -44,4 +44,4 @@ def multi_facrorize(numbers: tuple) -> list[list[int]]:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')
     numbers = (128, 255, 99999, 465466, 12316898, 2058068, 10651060)
-    print(factorize(numbers) == multi_facrorize(numbers)) # check if results is the same
+    print(f'Functions give same result -- {factorize(numbers) == multi_facrorize(numbers)}') # check if results is the same
