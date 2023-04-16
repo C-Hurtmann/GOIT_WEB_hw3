@@ -1,4 +1,5 @@
 from collections import namedtuple
+from threading import Thread
 from pathlib import Path
 import os
 import shutil
@@ -45,18 +46,22 @@ class Sorter:
     def __init__(self, folder):
         self.__folder = FolderContent(folder)
 
-    def __sort(self):
-            for i in self.__folder.map:  
-                new_folder_path = os.path.join(self.__folder.path, i.new_folder)
-                os.makedirs(new_folder_path, exist_ok=True)
-                os.replace(i.path, os.path.join(new_folder_path, i.name))
+    def __move_file(self, file):
+        new_folder_path = os.path.join(self.__folder.path, file.new_folder)
+        os.makedirs(new_folder_path, exist_ok=True)
+        os.replace(file.path, os.path.join(new_folder_path, file.name))
 
     def __delete_spare_folders(self):
         for i in self.__folder._define_spare_folders():
             shutil.rmtree(i)
 
     def run(self):
-        self.__sort()
+        threads = []
+        for i in self.__folder.map:
+            thread = Thread(target=self.__move_file, args=(i, ))
+            thread.start()
+            threads.append(thread)
+        [el.join() for el in threads]
         self.__delete_spare_folders()
         print(f'Folder {self.__folder.path.name} has been sorted successfully')
 
