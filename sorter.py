@@ -1,6 +1,7 @@
 from collections import namedtuple
 from threading import Thread
 from pathlib import Path
+from pprint import pprint
 import os
 import shutil
 
@@ -19,7 +20,7 @@ class FolderContent:
     def __init__(self, path):
         self.path = path
         self.map = []
-        self.__overlook(path)
+        self.__overlook()(path)
 
     def __define_folder(self, file):
         suffix = file.suffix.replace('.', '').upper()
@@ -29,15 +30,22 @@ class FolderContent:
         else:
             return 'unknown'
 
-    def __overlook(self, path=None):
-        if not path:
-            path = self.path
-        for i in path.iterdir():
-            if i.is_file():
-                self.map.append(self.File(name=i.name, path=i, new_folder=self.__define_folder(i)))
-            else:
-                self.__overlook(i)
-    
+    def __gather_info(self, file):
+        self.map.append(self.File(name=file.name, path=file, new_folder=self.__define_folder(file)))
+
+    def __overlook(self):
+        threads =[]
+        def inner(path):
+            for i in path.iterdir():
+                if i.is_file():
+                    thread = Thread(target=self.__gather_info, args=(i, ))
+                    thread.start()
+                    threads.append(thread)
+                    [el.join() for el in threads]
+                else:
+                    inner(i)
+        return inner
+
     def _define_spare_folders(self):
         subfolders = [i for i in self.path.iterdir() if i.is_dir()]
         return [i for i in subfolders if i.name not in list(SUFFIX_MAP.keys())]
@@ -68,6 +76,7 @@ class Sorter:
 
 if __name__ == '__main__':
     folder = FolderContent(Path('test_folder'))
+    pprint(folder.map)
     sorter = Sorter(Path('test_folder'))
     sorter.run()
  
