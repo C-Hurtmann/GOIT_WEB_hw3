@@ -10,7 +10,7 @@ def exec_factorize(number: int) -> list[int]:
     Returns:
         list[int]: numbers which could be divided on number without trace
     """
-    dividables  =[]
+    dividables = []
     for i in range(1, number + 1):
         if not number % i:
             dividables.append(i)
@@ -22,9 +22,11 @@ def timer(func):
     def wrapper(*args):
         timer = time()
         result = func(*args)
-        logging.debug(f'{func.__name__} - done in {time() - timer}')
+        logging.debug(f"{func.__name__} - done in {time() - timer}")
         return result
+
     return wrapper
+
 
 @timer
 def factorize(numbers: tuple):
@@ -32,6 +34,7 @@ def factorize(numbers: tuple):
     for number in numbers:
         result_list.append(exec_factorize(number))
     return result_list
+
 
 @timer
 def multi_facrorize(numbers: tuple) -> list[list[int]]:
@@ -41,7 +44,9 @@ def multi_facrorize(numbers: tuple) -> list[list[int]]:
     return result_list
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
     numbers = (128, 255, 99999, 465466, 12316898, 2058068, 10651060)
-    print(f'Functions give same result -- {factorize(numbers) == multi_facrorize(numbers)}') # check if results is the same
+    print(
+        f"Functions give same result -- {factorize(numbers) == multi_facrorize(numbers)}"   # check if results is the same
+    )

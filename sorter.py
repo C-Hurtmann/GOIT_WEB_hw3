@@ -6,16 +6,18 @@ import os
 import shutil
 
 
-SUFFIX_MAP = {'images':('JPG', 'PNG', 'JPG', 'SVG'),
-              'videos':('AVI', 'MP4', 'MOV', 'MKV'),
-              'documents':('DOC', 'DOCX', 'TXT', 'PDF', 'XLS', 'PPTX'),
-              'music':('MP3', 'OGG', 'WAV', 'AMR'),
-              'archives':('ZIP', 'GZ', 'TAR'),
-              'unknown':...}
+SUFFIX_MAP = {
+    "images": ("JPG", "PNG", "JPG", "SVG"),
+    "videos": ("AVI", "MP4", "MOV", "MKV"),
+    "documents": ("DOC", "DOCX", "TXT", "PDF", "XLS", "PPTX"),
+    "music": ("MP3", "OGG", "WAV", "AMR"),
+    "archives": ("ZIP", "GZ", "TAR"),
+    "unknown": ...,
+}
 
 
 class FolderContent:
-    File = namedtuple('File', 'name path new_folder')
+    File = namedtuple("File", "name path new_folder")
 
     def __init__(self, path):
         self.path = path
@@ -23,32 +25,37 @@ class FolderContent:
         self.__overlook()(path)
 
     def __define_folder(self, file):
-        suffix = file.suffix.replace('.', '').upper()
+        suffix = file.suffix.replace(".", "").upper()
         for k, v in SUFFIX_MAP.items():
             if suffix in v:
                 return k
         else:
-            return 'unknown'
+            return "unknown"
 
     def __gather_info(self, file):
-        self.map.append(self.File(name=file.name, path=file, new_folder=self.__define_folder(file)))
+        self.map.append(
+            self.File(name=file.name, path=file, new_folder=self.__define_folder(file))
+        )
 
     def __overlook(self):
-        threads =[]
+        threads = []
+
         def inner(path):
             for i in path.iterdir():
                 if i.is_file():
-                    thread = Thread(target=self.__gather_info, args=(i, ))
+                    thread = Thread(target=self.__gather_info, args=(i,))
                     thread.start()
                     threads.append(thread)
                     [el.join() for el in threads]
                 else:
                     inner(i)
+
         return inner
 
     def _define_spare_folders(self):
         subfolders = [i for i in self.path.iterdir() if i.is_dir()]
         return [i for i in subfolders if i.name not in list(SUFFIX_MAP.keys())]
+
 
 class Sorter:
     def __init__(self, folder):
@@ -66,17 +73,16 @@ class Sorter:
     def run(self):
         threads = []
         for i in self.__folder.map:
-            thread = Thread(target=self.__move_file, args=(i, ))
+            thread = Thread(target=self.__move_file, args=(i,))
             thread.start()
             threads.append(thread)
         [el.join() for el in threads]
         self.__delete_spare_folders()
-        print(f'Folder {self.__folder.path.name} has been sorted successfully')
+        print(f"Folder {self.__folder.path.name} has been sorted successfully")
 
 
-if __name__ == '__main__':
-    folder = FolderContent(Path('test_folder'))
+if __name__ == "__main__":
+    folder = FolderContent(Path("test_folder"))
     pprint(folder.map)
-    sorter = Sorter(Path('test_folder'))
+    sorter = Sorter(Path("test_folder"))
     sorter.run()
- 
